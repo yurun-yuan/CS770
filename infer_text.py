@@ -40,13 +40,19 @@ chats = [make_input(q, s) for q, s in zip(dataset["problem"], dataset["solution"
 chats = [tokenizer.apply_chat_template(chat, tokenize=False, add_generation_prompt=True) for chat in chats]
 
 MAX_LEN = 4096
-chats = [input for input in chats if len(tokenizer.encode(input)) <= MAX_LEN]
+length_exceed_indices = set()
+for i, chat in enumerate(chats):
+    if len(tokenizer.encode(chat)) > MAX_LEN:
+        length_exceed_indices.add(i)
+
+dataset = dataset.filter(lambda x, i: i not in length_exceed_indices, with_indices=True)
+chats = [chat for i, chat in enumerate(chats) if i not in length_exceed_indices]
 
 llm = LLM(
     model=MODEL_PATH,
     tokenizer=MODEL_PATH,
     dtype="bfloat16",
-    max_model_len=4096,
+    max_model_len=MAX_LEN,
     load_format="auto",
     seed=42,
     gpu_memory_utilization=0.95,
