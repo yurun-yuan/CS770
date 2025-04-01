@@ -39,6 +39,9 @@ Clearly identify any inaccuracies or logical errors, but do NOT provide the corr
 chats = [make_input(q, s) for q, s in zip(dataset["problem"], dataset["solution"])]
 chats = [tokenizer.apply_chat_template(chat, tokenize=False, add_generation_prompt=True) for chat in chats]
 
+MAX_LEN = 4096
+chats = [input for input in chats if len(tokenizer.encode(input)) <= MAX_LEN]
+
 llm = LLM(
     model=MODEL_PATH,
     tokenizer=MODEL_PATH,
